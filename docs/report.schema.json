@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Rit-Services/mosidi-geoimport/docs/report.schema.json",
+  "title": "Import-Bericht mosidi-geoimport",
+  "description": "Bericht nach jedem Lauf der Import-Pipeline (LB 4.5). Version 1.0 – Vorschlag zur Abstimmung mit dem Auftraggeber.",
+  "type": "object",
+  "required": ["schema_version", "run", "summary", "sources", "warnings"],
+  "additionalProperties": false,
+  "$defs": {
+    "count": {"type": ["integer", "null"], "minimum": 0},
+    "ts": {"type": ["string", "null"], "format": "date-time"},
+    "warning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string", "description": "z. B. schema_drift, possibly_truncated, unmatched_keys, geometry_repaired, geometry_skipped, missing_required_field, geometry_retained, config"},
+        "message": {"type": "string"},
+        "data": {"type": "object"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run": {
+      "type": "object",
+      "required": ["run_id", "trigger", "simulated", "dry_run", "started_at", "finished_at", "duration_s", "status", "app_version", "config_hash"],
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {"type": "string", "format": "uuid"},
+        "trigger": {"enum": ["schedule", "manual", "test", "demo"]},
+        "simulated": {"type": "boolean", "description": "true = Demo-Modus mit gezielt veränderten Daten"},
+        "dry_run": {"type": "boolean"},
+        "started_at": {"$ref": "#/$defs/ts"},
+        "finished_at": {"$ref": "#/$defs/ts"},
+        "duration_s": {"type": ["number", "null"]},
+        "status": {"enum": ["running", "ok", "partial", "aborted_incomplete", "failed"]},
+        "app_version": {"type": "string"},
+        "config_hash": {"type": "string"},
+        "target_adapter": {"type": "string"},
+        "timezone": {"type": "string"},
+        "refreshed_views": {"type": "array", "items": {"type": "string"}, "description": "nach dem Import aktualisierte materialisierte Sichten (Bieterantwort 75)"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["sources_total", "ok", "failed", "skipped", "added", "changed", "deleted", "errors", "warnings"],
+      "additionalProperties": false,
+      "properties": {
+        "sources_total": {"type": "integer"},
+        "ok": {"type": "integer"},
+        "failed": {"type": "integer", "description": "inkl. aborted_incomplete"},
+        "aborted_incomplete": {"type": "integer", "description": "Abruf unvollständig oder fehlerhaft, zurückgerollt"},
+        "skipped": {"type": "integer", "description": "nicht ersetzt wegen Schutzregel (skipped_guard)"},
+        "unchanged": {"type": "integer"},
+        "dry_run": {"type": "integer"},
+        "added": {"type": "integer", "description": "nur Quellen mit Status ok, dry_run oder unchanged"},
+        "changed": {"type": "integer"},
+        "deleted": {"type": "integer"},
+        "errors": {"type": "integer"},
+        "warnings": {"type": "integer"}
+      }
+    },
+    "warnings": {"type": "array", "items": {"$ref": "#/$defs/warning"}},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "title", "dataset", "status", "started_at", "finished_at", "duration_s", "fetched", "valid", "invalid", "added", "changed", "deleted", "unchanged", "warnings", "data_unchanged"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string"},
+          "title": {"type": "string"},
+          "dataset": {"type": "string"},
+          "status": {"enum": ["ok", "aborted_incomplete", "failed", "skipped_guard", "unchanged", "dry_run"]},
+          "started_at": {"$ref": "#/$defs/ts"},
+          "finished_at": {"$ref": "#/$defs/ts"},
+          "duration_s": {"type": ["number", "null"]},
+          "fetched": {"$ref": "#/$defs/count"},
+          "valid": {"$ref": "#/$defs/count"},
+          "invalid": {"$ref": "#/$defs/count"},
+          "repaired": {"$ref": "#/$defs/count"},
+          "added": {"$ref": "#/$defs/count"},
+          "changed": {"$ref": "#/$defs/count"},
+          "deleted": {"$ref": "#/$defs/count"},
+          "unchanged": {"$ref": "#/$defs/count"},
+          "invalid_existing": {"$ref": "#/$defs/count", "description": "bisher vorhandene Schlüssel, deren neuer Datensatz ungültig war (nicht als gelöscht gezählt)"},
+          "compared": {"type": "boolean", "description": "false = keine Vergleichsbasis, geändert/unverändert nicht zählbar"},
+          "rows_deleted": {"$ref": "#/$defs/count"},
+          "rows_inserted": {"$ref": "#/$defs/count"},
+          "quality": {
+            "type": "object",
+            "description": "Datenqualität je Quelle (Bieterantwort 63); bei Werten > 0 zusätzlich eine Warnung mit diesem Code",
+            "required": ["geometry_repaired", "geometry_skipped", "missing_required_field"],
+            "additionalProperties": false,
+            "properties": {
+              "geometry_repaired": {"type": "integer", "minimum": 0, "description": "ungültige Geometrien repariert und übernommen"},
+              "geometry_skipped": {"type": "integer", "minimum": 0, "description": "Datensätze wegen fehlender, leerer, nicht reparierbarer oder falsch typisierter Geometrie übersprungen"},
+              "missing_required_field": {"type": "integer", "minimum": 0, "description": "Datensätze wegen leerer Pflichtfelder übersprungen"}
+            }
+          },
+          "rows_updated": {"$ref": "#/$defs/count", "description": "Geometrien, die über ihren fachlichen Schlüssel aktualisiert wurden (Geometrien werden nie gelöscht, Bieterantwort 74)"},
+          "data_unchanged": {"type": "boolean", "description": "true = Bestand der Quelle in den Zieltabellen unverändert"},
+          "license": {"type": ["string", "null"]},
+          "attribution": {"type": ["string", "null"]},
+          "warnings": {"type": "array", "items": {"$ref": "#/$defs/warning"}},
+          "error": {
+            "type": "object",
+            "required": ["kind", "message"],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {"type": "string", "description": "http, timeout, network, ogc_exception, featuretype_missing, schema_mismatch, parse, incomplete, possibly_truncated, too_many_errors, database, config, ownership, …"},
+              "message": {"type": "string"},
+              "http_status": {"type": ["integer", "null"]},
+              "url": {"type": ["string", "null"]}
+            }
+          },
+          "error_examples": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {"record_key": {"type": ["string", "null"]}, "reason_code": {"type": "string"}, "reason": {"type": "string"}}
+            }
+          },
+          "raw": {"type": "object", "properties": {"file": {"type": ["string", "null"]}, "files": {"type": "integer"}, "sha256": {"type": ["string", "null"]}}},
+          "info": {"type": "object"},
+          "preview_sql": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+# Gemeinden Brandenburg aus dem WFS Verwaltungsgrenzen der LGB.
+# Geprüft am 29.10.2026: GetCapabilities antwortet (WFS 2.0.0, deegree), FeatureType app:gem vorhanden,
+# Default-CRS EPSG:25833, nur GML-Ausgabe, ImplementsResultPaging=FALSE, CountDefault=300000,
+# RESULTTYPE=hits → 413 Gemeinden.
+id: geobasis_bb_gemeinden
+type: wfs
+enabled: true
+title: "Gemeinden Brandenburg (LGB, Verwaltungsgrenzen)"
+license: "dl-de/by-2-0"
+attribution: "© GeoBasis-DE/LGB, dl-de/by-2-0"
+schedule: weekly                # Bieterantwort V7: konfigurierbar, mindestens monatlich (Mo 03:00)
+wfs:
+  url: "https://isk.geobasis-bb.de/ows/vg_wfs"
+  version: "2.0.0"
+  type_name: "app:gem"
+  request_crs: "EPSG:25833"   # Quell-CRS anfordern, lokal nach EPSG:4326 transformieren
+  output_format: auto         # GML 3.2 bevorzugt (Felder als Text)
+  paging:
+    strategy: none            # fest (nicht auto): Dienst ohne Paging, CountDefault 300000 → ein Request
+    page_size: 1000
+    tile_size_m: 20000
+    throttle_ms: 200
+  bbox: null                  # ganzes Land; für Tests z. B. Raum Brandenburg an der Havel
+business_key: ["ags"]         # fachlicher Schlüssel (Bieterantwort V4): Amtlicher Gemeindeschlüssel
+key_normalize: {ags: {zfill: 8}}
+mapping:
+  geometry: geom
+  name: gem_name
+  attributes:                 # Attributname im Zielmodell ← Quellfeld
+    ags: ags
+    ars: ars
+    gvbs: gvbs
+    krss: krss
+    gem_art: gem_art
+    aktualitaet: gem_aktualitaet
+target:
+  dataset: "geobasis_bb_gemeinden"
+  metadata:
+    titel: "Gemeinden Brandenburg"
+    publisher: "LGB"          # → dct_catalog_publisher; Wert mit der TH in AP1 abstimmen
+guards:
+  min_features: 400           # 413 Gemeinden laut RESULTTYPE=hits am 29.10.2026
+  max_drop_ratio: 0.2         # mehr als 20 % weniger Objekte als im Bestand → nicht ersetzen
+  geometry_types: [MultiPolygon, Polygon]
+  required: [ags, gem_name]

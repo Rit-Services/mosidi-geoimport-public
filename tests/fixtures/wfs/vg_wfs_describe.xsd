@@ -1,0 +1,204 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:app="http://www.deegree.org/app" xmlns:xlink="http://www.w3.org/1999/xlink" targetNamespace="http://www.deegree.org/app" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+  <element name="reg" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="reg_name" minOccurs="0" type="string"/>
+            <element name="reg_name_kurz" minOccurs="0" type="string"/>
+            <element name="reg_art" minOccurs="0" type="string"/>
+            <element name="reg_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="be_grenze" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="bldgs_nachbar" minOccurs="0" type="string"/>
+            <element name="bldgs_nachbar_kurz" minOccurs="0" type="string"/>
+            <element name="bldg_nachbar_name" minOccurs="0" type="string"/>
+            <element name="bldg_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiCurvePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="sorb" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="sorb_info" minOccurs="0" type="string"/>
+            <element name="sorb_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="gem" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="ags" minOccurs="0" type="string"/>
+            <element name="gvbs" minOccurs="0" type="string"/>
+            <element name="krss" minOccurs="0" type="string"/>
+            <element name="ars" minOccurs="0" type="string"/>
+            <element name="gem_name" minOccurs="0" type="string"/>
+            <element name="gem_art_kurz" minOccurs="0" type="string"/>
+            <element name="gem_art" minOccurs="0" type="string"/>
+            <element name="gem_regspr_name" minOccurs="0" type="string"/>
+            <element name="gem_regspr_hk" minOccurs="0" type="string"/>
+            <element name="gem_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="bz" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="bbezs" type="string"/>
+            <element name="bbez_name" minOccurs="0" type="string"/>
+            <element name="bbez_art_kurz" minOccurs="0" type="string"/>
+            <element name="bbez_art" minOccurs="0" type="string"/>
+            <element name="bbez_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="stg" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="stgs_nachbar" type="string"/>
+            <element name="stgs_nachbar_kurz" minOccurs="0" type="string"/>
+            <element name="stg_nachbar_name" minOccurs="0" type="string"/>
+            <element name="stg_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiCurvePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="bb_flaeche" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="ldfs" type="string"/>
+            <element name="ldfs_kurz" minOccurs="0" type="string"/>
+            <element name="ldf_name" minOccurs="0" type="string"/>
+            <element name="ldf_regspr_name" minOccurs="0" type="string"/>
+            <element name="ldf_regspr_hk" minOccurs="0" type="string"/>
+            <element name="ldf_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="krs" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="krss" minOccurs="0" type="string"/>
+            <element name="krss_kurz" minOccurs="0" type="string"/>
+            <element name="krs_name" minOccurs="0" type="string"/>
+            <element name="krs_kfz" minOccurs="0" type="string"/>
+            <element name="krs_art_kurz" minOccurs="0" type="string"/>
+            <element name="krs_art" minOccurs="0" type="string"/>
+            <element name="krs_regspr_name" minOccurs="0" type="string"/>
+            <element name="krs_regspr_hk" minOccurs="0" type="string"/>
+            <element name="krs_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="otl" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="otls" minOccurs="0" type="string"/>
+            <element name="ags" minOccurs="0" type="string"/>
+            <element name="otls_kurz" minOccurs="0" type="string"/>
+            <element name="otl_name" minOccurs="0" type="string"/>
+            <element name="otl_art_kurz" minOccurs="0" type="string"/>
+            <element name="otl_art" minOccurs="0" type="string"/>
+            <element name="otl_regspr_name" minOccurs="0" type="string"/>
+            <element name="otl_regspr_hk" minOccurs="0" type="string"/>
+            <element name="otl_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="bb_grenze" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="ldgs_nachbar" minOccurs="0" type="string"/>
+            <element name="ldgs_nachbar_kurz" minOccurs="0" type="string"/>
+            <element name="ldg_nachbar_name" minOccurs="0" type="string"/>
+            <element name="ldg_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiCurvePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="be_flaeche" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="bldfs" type="string"/>
+            <element name="bldfs_kurz" minOccurs="0" type="string"/>
+            <element name="bldf_name" minOccurs="0" type="string"/>
+            <element name="bldf_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+  <element name="gvb" substitutionGroup="gml:AbstractFeature">
+    <complexType>
+      <complexContent>
+        <extension base="gml:AbstractFeatureType">
+          <sequence>
+            <element name="gvbs" minOccurs="0" type="string"/>
+            <element name="gvb_name" minOccurs="0" type="string"/>
+            <element name="gvb_art_kurz" minOccurs="0" type="string"/>
+            <element name="gvb_art" minOccurs="0" type="string"/>
+            <element name="gvb_regspr_name" minOccurs="0" type="string"/>
+            <element name="gvb_regspr_hk" minOccurs="0" type="string"/>
+            <element name="gvb_aktualitaet" minOccurs="0" type="date"/>
+            <element name="geom" minOccurs="0" type="gml:MultiSurfacePropertyType"/>
+          </sequence>
+        </extension>
+      </complexContent>
+    </complexType>
+  </element>
+</schema>

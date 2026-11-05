@@ -1,0 +1,54 @@
+Bereich;ID;Kuerzel;Indikator;Raumbezug;Kennziffer;Name;Zeitbezug;Wert
+EU;18668;q_alo;Arbeitslosenquote;NUTS0;DE;Deutschland;2021;3,60
+LRB;1002;q_alo;Arbeitslosenquote;Kreise;12051;Brandenburg an der Havel;2023;7,10
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;01001000;Flensburg, Stadt;2023;8,20
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12051000;Brandenburg an der Havel;2022;320,07
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12051000;Brandenburg an der Havel;2023;13,48
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12051000;Brandenburg an der Havel;2022;138,24
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12051000;Brandenburg an der Havel;2023;112,38
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12051000;Brandenburg an der Havel;2022;368,50
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12051000;Brandenburg an der Havel;2023;338,67
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12051000;Brandenburg an der Havel;2022;446,20
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12051000;Brandenburg an der Havel;2023;44,38
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069018;Beetzsee;2022;211,54
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069018;Beetzsee;2023;15,87
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069018;Beetzsee;2022;110,10
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069018;Beetzsee;2023;253,17
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069018;Beetzsee;2022;14,24
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069018;Beetzsee;2023;100,22
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069018;Beetzsee;2022;325,29
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069018;Beetzsee;2023;272,93
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069019;Beetzseeheide;2022;111,00
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069019;Beetzseeheide;2023;295,04
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069019;Beetzseeheide;2022;404,91
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069019;Beetzseeheide;2023;4,24
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069019;Beetzseeheide;2022;403,10
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069019;Beetzseeheide;2023;349,37
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069019;Beetzseeheide;2022;170,79
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069019;Beetzseeheide;2023;78,58
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069270;Havelsee;2022;478,65
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069270;Havelsee;2023;168,96
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069270;Havelsee;2022;47,28
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069270;Havelsee;2023;49,26
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069270;Havelsee;2022;423,90
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069270;Havelsee;2023;302,26
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069270;Havelsee;2022;403,76
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069270;Havelsee;2023;365,14
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069306;Kloster Lehnin;2022;268,58
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069306;Kloster Lehnin;2023;486,58
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069306;Kloster Lehnin;2022;189,89
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069306;Kloster Lehnin;2023;276,47
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069306;Kloster Lehnin;2022;414,87
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069306;Kloster Lehnin;2023;309,64
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069306;Kloster Lehnin;2022;430,99
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069306;Kloster Lehnin;2023;289,10
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069541;Roskow;2022;352,58
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12069541;Roskow;2023;23,87
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069541;Roskow;2022;114,72
+LRB;1002;q_alo;Arbeitslosenquote;Gemeinden;12069541;Roskow;2023;145,40
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069541;Roskow;2022;40,82
+ZOM;2001;a_bb_4G;Bevölkerung;Gemeinden;12069541;Roskow;2023;117,16
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069541;Roskow;2022;51,40
+ZOM;2001;a_bb_4G;Bildung;Gemeinden;12069541;Roskow;2023;139,71
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12999999;Unbekannt (Test);2023;1,00
+LRB;1001;bev_dichte;Einwohnerdichte;Gemeinden;12051000;Brandenburg an der Havel;2024;n/a

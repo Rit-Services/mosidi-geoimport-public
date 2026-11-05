@@ -1,0 +1,32 @@
+# Globale Einstellungen der Import-Pipeline
+http:
+  timeout_s: 60
+  retries: 4                  # exponentiell: 2, 4, 8, 16 s (+ Zufallsanteil)
+  retry_on_status: [429, 500, 502, 503, 504]
+  backoff_base_s: 2
+  user_agent: "mosidi-geoimport/${APP_VERSION} (+https://github.com/Rit-Services/mosidi-geoimport)"
+storage:
+  raw_dir: ${DATA_DIR:-/data}/raw
+  report_dir: ${DATA_DIR:-/data}/reports
+  state_dir: ${DATA_DIR:-/data}/state
+  retention_days: 30          # Rohdaten älter als 30 Tage löschen (der jüngste Stand je Quelle bleibt)
+crs:
+  target: "EPSG:4326"         # Bieterantwort A7
+  plausibility_bbox_4326: [5.5, 47.0, 15.5, 55.2]   # Deutschland grob
+meta:
+  location: schema            # schema (eigenes Schema in der Zieldatenbank) | database (eigene Datenbank)
+  schema: pipeline_meta
+  database: geoimport_meta    # nur bei location: database
+  diff_geoms: ${GEOIMPORT_DIFF_GEOMS:-false}   # true nur in der Demo: Geometrien für die Änderungskarte sichern
+  keep_runs: 90               # Details älterer Läufe löschen, Lauf-Kopf bleibt
+run:
+  fail_exit_code_partial: 1
+  fail_exit_code_all: 2
+  max_error_ratio: 0.05       # mehr als 5 % fehlerhafte Datensätze → Quelle gilt als fehlgeschlagen
+  lock_wait_s: 1800           # geplanter Lauf (--trigger schedule) wartet so lange auf einen aktiven Lauf, dann Exit 4 + Webhook
+report:
+  notify_webhook_env: null    # z. B. GEOIMPORT_WEBHOOK_URL (Benachrichtigung bei Fehlern), Standard aus
+db:
+  lock_timeout_s: 60          # höchstens so lange auf Tabellensperren warten (z. B. durch die MOSIDI-Anwendung), 0 = unbegrenzt
+  statement_timeout_s: 1800   # Höchstdauer einer SQL-Anweisung (30 min), 0 = unbegrenzt
+  keepalives_idle_s: 60       # TCP-Keepalive: abgerissene Verbindungen erkennen

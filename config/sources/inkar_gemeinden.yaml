@@ -1,0 +1,62 @@
+# INKAR – Indikatoren auf Gemeindeebene (BBSR), nur Brandenburg.
+# Geprüft am 29.10.2026: inkar_2025.zip → HTTP 200, 433.790.695 Bytes, Last-Modified 13.08.2025.
+# Archiv mit Deflate64 komprimiert; inkar_2025.csv entpackt 6.762.930.064 Bytes, UTF-8, Trennzeichen ";",
+# Dezimalkomma. Kopfzeile: Bereich;ID;Kuerzel;Indikator;Raumbezug;Kennziffer;Name;Zeitbezug;Wert
+# Brandenburg (Raumbezug "Gemeinden", Kennziffer 12…): 1.285.774 Zeilen, 413 Gemeinden, 333 Indikatoren,
+# Zeitbezug 1995–2024.
+#
+# Schlüssel: (Kennziffer, Indikator, Zeitbezug) ist NICHT eindeutig (36.232 Dubletten in Brandenburg);
+# eindeutig ist erst (Kennziffer, Bereich, Kuerzel, Indikator, Zeitbezug).
+id: inkar_gemeinden
+type: csv
+enabled: true
+title: "INKAR – Indikatoren auf Gemeindeebene (BBSR)"
+license: "TODO_RIT: Nutzungsbedingungen INKAR/BBSR prüfen und eintragen"
+attribution: "Datenbasis: Laufende Raumbeobachtung des BBSR, INKAR"
+schedule: monthly             # INKAR erscheint jährlich; unveränderte Datei wird per ETag/Hash erkannt (1. des Monats 04:00)
+csv:
+  location:
+    url_template: "https://www.bbr-server.de/imagemap/inkar/download/inkar_{year}.zip"
+    year: latest              # wie die Vorarbeit: ab nächstem Jahr rückwärts per HEAD suchen
+    search_years_back: 5
+    # Betrieb ohne Download: path: /data/inbox/inkar_2025.zip
+  archive:
+    member_glob: "inkar*.csv" # Dateimuster aus der Vorarbeit (filenames_in_folder)
+  encoding: auto
+  delimiter: ";"
+  decimal: ","
+  chunksize: 500000
+  row_filter:
+    Raumbezug: "Gemeinden"    # wie Vorarbeit
+  region_filter:
+    column: Kennziffer
+    prefix: "12"              # Brandenburg
+columns:                      # CSV-Spalte → Zielfeld (abgeleitet aus config.xml der Vorarbeit)
+  Kennziffer: {to: region_key, type: str, normalize: {zfill: 8}}
+  Bereich:    {to: domain,    type: str}
+  Kuerzel:    {to: indicator_code, type: str}
+  Indikator:  {to: indicator, type: str}
+  Zeitbezug:  {to: period,    type: str}
+  Wert:       {to: value,     type: float}
+  Name:       {to: region_name, type: str, keep: false}
+business_key: [region_key, domain, indicator_code, indicator, period]  # fachlicher Schlüssel (V4), eindeutig siehe oben
+record:                       # welche Zielfelder Raumbezug, Name, Wert und Zeitbezug sind
+  object_key: region_key
+  name: indicator
+  value: value
+  period: period
+geometry_join:                # Bezug auf die Gemeinde-Geometrien der WFS-Quelle (AGS)
+  source: geobasis_bb_gemeinden
+  key: ags
+  column: region_key
+  on_missing: warn
+target:
+  dataset: "inkar_gemeinden"
+  metadata:
+    titel: "INKAR Gemeinden Brandenburg"
+    publisher: "BBSR"         # → dct_catalog_publisher (Antwort 74); genauer Wert mit der TH in AP1 abstimmen
+guards:
+  min_rows: 1000000           # 1.285.774 Zeilen am 29.10.2026
+  max_drop_ratio: 0.3
+  required: [region_key, indicator, period, value]   # Pflicht laut Bieterantwort 63: Schlüssel, Raumbezug, Zeitbezug, Wert
+  expected_columns: [Bereich, ID, Kuerzel, Indikator, Raumbezug, Kennziffer, Name, Zeitbezug, Wert]

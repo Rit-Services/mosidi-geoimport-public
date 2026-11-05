@@ -1,0 +1,16 @@
+# Platzhalter: dritte vorgegebene WFS-Quelle (Bieterantwort A4).
+# Bleibt deaktiviert, bis die TH die Quelle benennt (Bieterfrage 6).
+id: TODO_TH_wfs_quelle_3
+type: wfs
+enabled: false
+title: "TODO_TH: dritte vorgegebene WFS-Quelle"
+license: "TODO_TH"
+wfs:
+  url: "TODO_TH_URL"
+  version: "2.0.0"
+  type_name: "TODO_TH_FEATURETYPE"
+  request_crs: null
+  paging: {strategy: startindex}  # fest, nicht auto: vor Aktivierung mit 'pipeline probe' prüfen
+business_key: ["TODO_TH_SCHLUESSELFELD"]
+mapping: {geometry: "TODO_TH_GEOMETRIEFELD", attributes: {}}
+target: {dataset: "TODO_TH_wfs_quelle_3"}

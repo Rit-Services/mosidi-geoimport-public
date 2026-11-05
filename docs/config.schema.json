@@ -1,0 +1,2125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "geoimport – Konfiguration",
+  "pipeline.yaml": {
+    "$defs": {
+      "CrsSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "target": {
+            "const": "EPSG:4326",
+            "default": "EPSG:4326",
+            "title": "Target",
+            "type": "string"
+          },
+          "plausibility_bbox_4326": {
+            "default": [
+              5.5,
+              47.0,
+              15.5,
+              55.2
+            ],
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Plausibility Bbox 4326",
+            "type": "array"
+          }
+        },
+        "title": "CrsSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "lock_timeout_s": {
+            "default": 60,
+            "description": "Warten auf Tabellensperren (0 = unbegrenzt)",
+            "minimum": 0,
+            "title": "Lock Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_s": {
+            "default": 1800,
+            "description": "Höchstdauer einer SQL-Anweisung (0 = unbegrenzt)",
+            "minimum": 0,
+            "title": "Statement Timeout S",
+            "type": "number"
+          },
+          "keepalives_idle_s": {
+            "default": 60,
+            "description": "TCP-Keepalive: erste Prüfung nach so vielen Sekunden Ruhe",
+            "minimum": 1,
+            "title": "Keepalives Idle S",
+            "type": "integer"
+          }
+        },
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "HttpSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "timeout_s": {
+            "default": 60,
+            "title": "Timeout S",
+            "type": "number"
+          },
+          "retries": {
+            "default": 4,
+            "maximum": 10,
+            "minimum": 0,
+            "title": "Retries",
+            "type": "integer"
+          },
+          "retry_on_status": {
+            "default": [
+              429,
+              500,
+              502,
+              503,
+              504
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Retry On Status",
+            "type": "array"
+          },
+          "backoff_base_s": {
+            "default": 2.0,
+            "description": "Wartezeit vor dem 1. Wiederholversuch, danach verdoppelt",
+            "minimum": 0,
+            "title": "Backoff Base S",
+            "type": "number"
+          },
+          "user_agent": {
+            "default": "mosidi-geoimport",
+            "title": "User Agent",
+            "type": "string"
+          },
+          "deadline_s": {
+            "default": 1800,
+            "description": "Gesamtfrist je Anfrage bzw. Download samt Antwort (timeout_s gilt je Lesevorgang)",
+            "exclusiveMinimum": 0,
+            "title": "Deadline S",
+            "type": "number"
+          },
+          "max_retry_after_s": {
+            "default": 300,
+            "description": "Obergrenze für die vom Dienst verlangte Wartezeit (Retry-After)",
+            "minimum": 0,
+            "title": "Max Retry After S",
+            "type": "number"
+          },
+          "max_response_mb": {
+            "default": 512,
+            "description": "Höchstgröße einer Antwort im Speicher (z. B. WFS-Seite), entpackt",
+            "minimum": 1,
+            "title": "Max Response Mb",
+            "type": "integer"
+          },
+          "max_download_mb": {
+            "default": 2048,
+            "description": "Höchstgröße eines Downloads (z. B. CSV/ZIP), entpackt",
+            "minimum": 1,
+            "title": "Max Download Mb",
+            "type": "integer"
+          },
+          "max_decompression_ratio": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 200,
+            "description": "Höchstes Verhältnis entpackt/übertragen bei Content-Encoding (null: keine Prüfung)",
+            "title": "Max Decompression Ratio"
+          }
+        },
+        "title": "HttpSettings",
+        "type": "object"
+      },
+      "MetaSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "default": "schema",
+            "enum": [
+              "schema",
+              "database"
+            ],
+            "title": "Location",
+            "type": "string"
+          },
+          "schema": {
+            "default": "pipeline_meta",
+            "title": "Schema",
+            "type": "string"
+          },
+          "database": {
+            "default": "geoimport_meta",
+            "title": "Database",
+            "type": "string"
+          },
+          "diff_geoms": {
+            "default": false,
+            "title": "Diff Geoms",
+            "type": "boolean"
+          },
+          "keep_runs": {
+            "default": 90,
+            "minimum": 1,
+            "title": "Keep Runs",
+            "type": "integer"
+          }
+        },
+        "title": "MetaSettings",
+        "type": "object"
+      },
+      "ReportSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "notify_webhook_env": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Name einer Umgebungsvariablen mit Webhook-URL für Fehlermeldungen (Standard: aus)",
+            "title": "Notify Webhook Env"
+          }
+        },
+        "title": "ReportSettings",
+        "type": "object"
+      },
+      "RunSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "fail_exit_code_partial": {
+            "default": 1,
+            "title": "Fail Exit Code Partial",
+            "type": "integer"
+          },
+          "fail_exit_code_all": {
+            "default": 2,
+            "title": "Fail Exit Code All",
+            "type": "integer"
+          },
+          "max_error_ratio": {
+            "default": 0.05,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Max Error Ratio",
+            "type": "number"
+          },
+          "lock_wait_s": {
+            "default": 1800,
+            "description": "geplante Läufe (--trigger schedule): so lange auf einen aktiven Lauf warten",
+            "minimum": 0,
+            "title": "Lock Wait S",
+            "type": "integer"
+          }
+        },
+        "title": "RunSettings",
+        "type": "object"
+      },
+      "StorageSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "raw_dir": {
+            "default": "\\data\\raw",
+            "format": "path",
+            "title": "Raw Dir",
+            "type": "string"
+          },
+          "report_dir": {
+            "default": "\\data\\reports",
+            "format": "path",
+            "title": "Report Dir",
+            "type": "string"
+          },
+          "state_dir": {
+            "default": "\\data\\state",
+            "format": "path",
+            "title": "State Dir",
+            "type": "string"
+          },
+          "retention_days": {
+            "default": 30,
+            "minimum": 1,
+            "title": "Retention Days",
+            "type": "integer"
+          }
+        },
+        "title": "StorageSettings",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "http": {
+        "$ref": "#/$defs/HttpSettings",
+        "default": {
+          "timeout_s": 60.0,
+          "retries": 4,
+          "retry_on_status": [
+            429,
+            500,
+            502,
+            503,
+            504
+          ],
+          "backoff_base_s": 2.0,
+          "user_agent": "mosidi-geoimport",
+          "deadline_s": 1800.0,
+          "max_retry_after_s": 300.0,
+          "max_response_mb": 512,
+          "max_download_mb": 2048,
+          "max_decompression_ratio": 200.0
+        }
+      },
+      "storage": {
+        "$ref": "#/$defs/StorageSettings",
+        "default": {
+          "raw_dir": "\\data\\raw",
+          "report_dir": "\\data\\reports",
+          "state_dir": "\\data\\state",
+          "retention_days": 30
+        }
+      },
+      "crs": {
+        "$ref": "#/$defs/CrsSettings",
+        "default": {
+          "target": "EPSG:4326",
+          "plausibility_bbox_4326": [
+            5.5,
+            47.0,
+            15.5,
+            55.2
+          ]
+        }
+      },
+      "meta": {
+        "$ref": "#/$defs/MetaSettings",
+        "default": {
+          "location": "schema",
+          "schema": "pipeline_meta",
+          "database": "geoimport_meta",
+          "diff_geoms": false,
+          "keep_runs": 90
+        }
+      },
+      "run": {
+        "$ref": "#/$defs/RunSettings",
+        "default": {
+          "fail_exit_code_partial": 1,
+          "fail_exit_code_all": 2,
+          "max_error_ratio": 0.05,
+          "lock_wait_s": 1800
+        }
+      },
+      "report": {
+        "$ref": "#/$defs/ReportSettings",
+        "default": {
+          "notify_webhook_env": null
+        }
+      },
+      "db": {
+        "$ref": "#/$defs/DatabaseSettings",
+        "default": {
+          "lock_timeout_s": 60.0,
+          "statement_timeout_s": 1800.0,
+          "keepalives_idle_s": 60
+        }
+      }
+    },
+    "title": "PipelineConfig",
+    "type": "object"
+  },
+  "target.yaml": {
+    "$defs": {
+      "AfterImport": {
+        "additionalProperties": false,
+        "description": "Schritte nach dem Import (Bieterantwort 75: eigenständiger Betrieb ohne MOSIDI-Funktionen).",
+        "properties": {
+          "refresh_materialized_views": {
+            "description": "materialisierte Sichten (name oder schema.name, ohne Schema: schema des Zielmodells), die nach einem Lauf mit geschriebenen Daten per REFRESH MATERIALIZED VIEW aktualisiert werden (z. B. source_granularities)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Refresh Materialized Views",
+            "type": "array"
+          },
+          "concurrently": {
+            "default": false,
+            "description": "REFRESH … CONCURRENTLY (braucht einen eindeutigen Index auf der Sicht, sperrt keine Leser)",
+            "title": "Concurrently",
+            "type": "boolean"
+          }
+        },
+        "title": "AfterImport",
+        "type": "object"
+      },
+      "AttributesTable": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "fk_metadata": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fk Metadata"
+          },
+          "fk_geometry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fk Geometry"
+          },
+          "source_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Column"
+          },
+          "object_key_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Object Key Column"
+          },
+          "layout": {
+            "default": "key_value",
+            "enum": [
+              "key_value",
+              "jsonb",
+              "wide"
+            ],
+            "title": "Layout",
+            "type": "string"
+          },
+          "name_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name Column"
+          },
+          "value_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value Column"
+          },
+          "period_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Period Column"
+          },
+          "jsonb_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Jsonb Column"
+          },
+          "wide_columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "Attributname → Spalte (nur layout: wide)",
+            "title": "Wide Columns",
+            "type": "object"
+          },
+          "columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Columns",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "AttributesTable",
+        "type": "object"
+      },
+      "DeleteScope": {
+        "additionalProperties": false,
+        "properties": {
+          "strategy": {
+            "default": "by_metadata_source",
+            "enum": [
+              "by_metadata_source",
+              "by_source_column",
+              "sql"
+            ],
+            "title": "Strategy",
+            "type": "string"
+          },
+          "sql": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "nur bei strategy=sql: DELETE … WHERE … mit %(dataset)s bzw. %(meta_id)s",
+            "title": "Sql"
+          },
+          "scope_sql": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ScopeSql"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "nur bei strategy=sql (Pflicht): Bestand für die Schutzregeln"
+          },
+          "geometry_scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "nur bei strategy=sql: Bedingung auf der Geometrietabelle, die die Geometrien des Datensatzes findet (z. B. \"herkunft = %(dataset)s\"); nötig, wenn geometries weder fk_metadata noch source_column hat. Geometrien werden darüber aktualisiert, nie gelöscht (Bieterantwort 74).",
+            "title": "Geometry Scope"
+          }
+        },
+        "title": "DeleteScope",
+        "type": "object"
+      },
+      "GeometriesTable": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pk": {
+            "title": "Pk",
+            "type": "string"
+          },
+          "fk_metadata": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fk Metadata"
+          },
+          "source_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Column"
+          },
+          "object_key_column": {
+            "title": "Object Key Column",
+            "type": "string"
+          },
+          "geometry_column": {
+            "title": "Geometry Column",
+            "type": "string"
+          },
+          "srid": {
+            "const": 4326,
+            "default": 4326,
+            "title": "Srid",
+            "type": "integer"
+          },
+          "columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Columns",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "pk",
+          "object_key_column",
+          "geometry_column"
+        ],
+        "title": "GeometriesTable",
+        "type": "object"
+      },
+      "MetadataTable": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pk": {
+            "title": "Pk",
+            "type": "string"
+          },
+          "dataset_column": {
+            "description": "Spalte mit der Kennung des Datensatzes (= target.dataset der Quelle)",
+            "title": "Dataset Column",
+            "type": "string"
+          },
+          "columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Columns",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "pk",
+          "dataset_column"
+        ],
+        "title": "MetadataTable",
+        "type": "object"
+      },
+      "ScopeSql": {
+        "additionalProperties": false,
+        "description": "Bestand eines Datensatzes bei ``strategy: sql`` – genau die Zeilen, die die DELETE-Anweisungen löschen.\n\nZählt für die Schutzregeln (Rückgang, Minimum) und liefert die Objektschlüssel ohne Vergleichsbasis.",
+        "properties": {
+          "features": {
+            "description": "SELECT mit einer Zeile je Geometrie des Datensatzes; erste Spalte = Objektschlüssel",
+            "title": "Features",
+            "type": "string"
+          },
+          "values": {
+            "description": "SELECT mit einer Zeile je Attribut-/Kennzahlzeile des Datensatzes",
+            "title": "Values",
+            "type": "string"
+          }
+        },
+        "required": [
+          "features",
+          "values"
+        ],
+        "title": "ScopeSql",
+        "type": "object"
+      },
+      "TargetTables": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "$ref": "#/$defs/MetadataTable"
+          },
+          "geometries": {
+            "$ref": "#/$defs/GeometriesTable"
+          },
+          "attributes": {
+            "$ref": "#/$defs/AttributesTable"
+          }
+        },
+        "required": [
+          "metadata",
+          "geometries",
+          "attributes"
+        ],
+        "title": "TargetTables",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "adapter": {
+        "default": "table_mapping",
+        "enum": [
+          "table_mapping",
+          "demo_reference"
+        ],
+        "title": "Adapter",
+        "type": "string"
+      },
+      "schema": {
+        "title": "Schema",
+        "type": "string"
+      },
+      "tables": {
+        "$ref": "#/$defs/TargetTables"
+      },
+      "delete_scope": {
+        "$ref": "#/$defs/DeleteScope",
+        "default": {
+          "strategy": "by_metadata_source",
+          "sql": null,
+          "scope_sql": null,
+          "geometry_scope": null
+        }
+      },
+      "after_import": {
+        "$ref": "#/$defs/AfterImport",
+        "default": {
+          "refresh_materialized_views": [],
+          "concurrently": false
+        }
+      }
+    },
+    "required": [
+      "schema",
+      "tables"
+    ],
+    "title": "TargetConfig",
+    "type": "object"
+  },
+  "sources/*.yaml": {
+    "$defs": {
+      "ColumnSpec": {
+        "additionalProperties": false,
+        "properties": {
+          "to": {
+            "title": "To",
+            "type": "string"
+          },
+          "type": {
+            "default": "str",
+            "enum": [
+              "str",
+              "int",
+              "float",
+              "date"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "normalize": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/NormalizeSpec"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "keep": {
+            "default": true,
+            "title": "Keep",
+            "type": "boolean"
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "strptime-Format, Pflicht bei type: date (z. B. '%d.%m.%Y')",
+            "title": "Date Format"
+          }
+        },
+        "required": [
+          "to"
+        ],
+        "title": "ColumnSpec",
+        "type": "object"
+      },
+      "ConcatExpr": {
+        "additionalProperties": false,
+        "properties": {
+          "concat": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/FieldExpr"
+                },
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                }
+              ]
+            },
+            "title": "Concat",
+            "type": "array"
+          },
+          "sep": {
+            "default": "",
+            "title": "Sep",
+            "type": "string"
+          }
+        },
+        "required": [
+          "concat"
+        ],
+        "title": "ConcatExpr",
+        "type": "object"
+      },
+      "ConstExpr": {
+        "additionalProperties": false,
+        "properties": {
+          "const": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Const"
+          }
+        },
+        "required": [
+          "const"
+        ],
+        "title": "ConstExpr",
+        "type": "object"
+      },
+      "Coordinates": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "string"
+          },
+          "y": {
+            "title": "Y",
+            "type": "string"
+          },
+          "crs": {
+            "title": "Crs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "crs"
+        ],
+        "title": "Coordinates",
+        "type": "object"
+      },
+      "CsvArchive": {
+        "additionalProperties": false,
+        "properties": {
+          "member_glob": {
+            "title": "Member Glob",
+            "type": "string"
+          }
+        },
+        "required": [
+          "member_glob"
+        ],
+        "title": "CsvArchive",
+        "type": "object"
+      },
+      "CsvLimits": {
+        "additionalProperties": false,
+        "description": "Obergrenzen beim Lesen (Schutz vor Archivbomben und Dateien ohne Zeilenumbruch).",
+        "properties": {
+          "max_line_bytes": {
+            "default": 1048576,
+            "description": "längste erlaubte Zeile in Bytes",
+            "minimum": 1024,
+            "title": "Max Line Bytes",
+            "type": "integer"
+          },
+          "max_uncompressed_bytes": {
+            "default": 17179869184,
+            "description": "höchstens so viele Bytes (entpackt) lesen; INKAR 2025: 6,8 GB",
+            "minimum": 1048576,
+            "title": "Max Uncompressed Bytes",
+            "type": "integer"
+          },
+          "max_compression_ratio": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "ZIP/GZ: entpackt höchstens das N-fache der Archivgröße (mindestens 256 MiB); INKAR 2025: 15,6; null = aus",
+            "title": "Max Compression Ratio"
+          }
+        },
+        "title": "CsvLimits",
+        "type": "object"
+      },
+      "CsvLocation": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "zusätzliche Abfrageparameter (z. B. Token per ${VAR}); werden nicht mit der URL gespeichert",
+            "title": "Params",
+            "type": "object"
+          },
+          "url_template": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL mit {year}, z. B. …/inkar_{year}.zip",
+            "title": "Url Template"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "const": "latest",
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year"
+          },
+          "search_years_back": {
+            "default": 5,
+            "maximum": 30,
+            "minimum": 0,
+            "title": "Search Years Back",
+            "type": "integer"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path"
+          },
+          "fallback_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Ersatzdatei, wenn der Download scheitert (z. B. AfS-Export; Bieterantwort V10)",
+            "title": "Fallback Path"
+          }
+        },
+        "title": "CsvLocation",
+        "type": "object"
+      },
+      "CsvSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "$ref": "#/$defs/CsvLocation"
+          },
+          "archive": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CsvArchive"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "encoding": {
+            "default": "auto",
+            "title": "Encoding",
+            "type": "string"
+          },
+          "delimiter": {
+            "default": ";",
+            "title": "Delimiter",
+            "type": "string"
+          },
+          "decimal": {
+            "default": ",",
+            "title": "Decimal",
+            "type": "string"
+          },
+          "thousands": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Thousands"
+          },
+          "quotechar": {
+            "default": "\"",
+            "title": "Quotechar",
+            "type": "string"
+          },
+          "header_row": {
+            "default": 0,
+            "title": "Header Row",
+            "type": "integer"
+          },
+          "skip_rows": {
+            "default": 0,
+            "title": "Skip Rows",
+            "type": "integer"
+          },
+          "column_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "eigene Spaltennamen, wenn die Kopfzeilen nicht verwendbar sind (dann ohne Kopfzeile lesen)",
+            "title": "Column Names"
+          },
+          "footer_rows": {
+            "default": 0,
+            "title": "Footer Rows",
+            "type": "integer"
+          },
+          "footer_marker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Lesen endet vor der ersten Zeile, die so beginnt (z. B. '__________' vor Fußnoten)",
+            "title": "Footer Marker"
+          },
+          "na_values": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Na Values",
+            "type": "array"
+          },
+          "chunksize": {
+            "default": 100000,
+            "minimum": 100,
+            "title": "Chunksize",
+            "type": "integer"
+          },
+          "row_filter": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Row Filter",
+            "type": "object"
+          },
+          "region_filter": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RegionFilter"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "limits": {
+            "$ref": "#/$defs/CsvLimits",
+            "default": {
+              "max_line_bytes": 1048576,
+              "max_uncompressed_bytes": 17179869184,
+              "max_compression_ratio": 100.0
+            }
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "title": "CsvSettings",
+        "type": "object"
+      },
+      "CsvSource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "license": {
+            "title": "License",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attribution"
+          },
+          "schedule": {
+            "default": "monthly",
+            "description": "Zeitplan (Bieterantwort V7): daily | weekly | monthly oder Cron mit 5 Feldern; mindestens ein Lauf je Monat",
+            "title": "Schedule",
+            "type": "string"
+          },
+          "skip_if_unchanged": {
+            "default": true,
+            "title": "Skip If Unchanged",
+            "type": "boolean"
+          },
+          "business_key": {
+            "description": "Fachlicher Schlüssel (Bieterantwort V4): Feld(er), über die Datensätze verknüpft und Läufe verglichen werden (neu/geändert/entfernt), z. B. [ags]",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Business Key",
+            "type": "array"
+          },
+          "key_normalize": {
+            "additionalProperties": {
+              "$ref": "#/$defs/NormalizeSpec"
+            },
+            "default": {},
+            "description": "Normalisierung je Schlüsselfeld",
+            "title": "Key Normalize",
+            "type": "object"
+          },
+          "target": {
+            "$ref": "#/$defs/TargetRef"
+          },
+          "guards": {
+            "$ref": "#/$defs/Guards",
+            "default": {
+              "min_features": null,
+              "min_rows": null,
+              "max_drop_ratio": 0.2,
+              "max_error_ratio": null,
+              "geometry_types": null,
+              "required": [],
+              "expected_columns": null,
+              "strict_count": true
+            }
+          },
+          "type": {
+            "const": "csv",
+            "title": "Type",
+            "type": "string"
+          },
+          "csv": {
+            "$ref": "#/$defs/CsvSettings"
+          },
+          "reshape": {
+            "$ref": "#/$defs/Reshape",
+            "default": {
+              "wide_to_long": null
+            }
+          },
+          "columns": {
+            "additionalProperties": {
+              "$ref": "#/$defs/ColumnSpec"
+            },
+            "title": "Columns",
+            "type": "object"
+          },
+          "coordinates": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Coordinates"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Punktgeometrie aus Koordinatenspalten"
+          },
+          "geometry_join": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/GeometryJoin"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "record": {
+            "$ref": "#/$defs/ValueRecordSpec",
+            "default": {
+              "object_key": "region_key",
+              "name": "indicator",
+              "value": "value",
+              "period": "period"
+            }
+          },
+          "mapping": {
+            "$ref": "#/$defs/Mapping",
+            "default": {
+              "geometry": null,
+              "name": null,
+              "attributes": {}
+            },
+            "description": "nur bei coordinates: Name/Attribute der Punktobjekte"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "license",
+          "business_key",
+          "target",
+          "type",
+          "csv",
+          "columns"
+        ],
+        "title": "CsvSource",
+        "type": "object"
+      },
+      "FieldExpr": {
+        "additionalProperties": false,
+        "description": "Feldwert, optional normalisiert: ``{field: ags, zfill: 8}``.",
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "zfill": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Zfill"
+          },
+          "to_int": {
+            "default": false,
+            "title": "To Int",
+            "type": "boolean"
+          },
+          "to_float": {
+            "default": false,
+            "title": "To Float",
+            "type": "boolean"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "strptime-Format, z. B. '%d.%m.%Y'",
+            "title": "To Date"
+          },
+          "decimal": {
+            "anyOf": [
+              {
+                "enum": [
+                  ",",
+                  "."
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Dezimaltrennzeichen für to_int/to_float; ohne Angabe genau ein Punkt oder Komma (bei CSV-Quellen gilt csv.decimal)",
+            "title": "Decimal"
+          },
+          "thousands": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Tausendertrennzeichen für to_int/to_float (bei CSV: csv.thousands)",
+            "title": "Thousands"
+          }
+        },
+        "required": [
+          "field"
+        ],
+        "title": "FieldExpr",
+        "type": "object"
+      },
+      "GeometryJoin": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "nur zur Dokumentation: Schlüsselfeld der Geometrie-Quelle",
+            "title": "Key"
+          },
+          "column": {
+            "default": "region_key",
+            "description": "Zielfeld der CSV mit dem Schlüssel (= record.object_key)",
+            "title": "Column",
+            "type": "string"
+          },
+          "on_missing": {
+            "default": "warn",
+            "enum": [
+              "warn",
+              "error",
+              "drop"
+            ],
+            "title": "On Missing",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "title": "GeometryJoin",
+        "type": "object"
+      },
+      "Guards": {
+        "additionalProperties": false,
+        "properties": {
+          "min_features": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "WFS/Punkt-CSV: Mindestanzahl Objekte",
+            "title": "Min Features"
+          },
+          "min_rows": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "CSV: Mindestanzahl Zeilen nach Filter",
+            "title": "Min Rows"
+          },
+          "max_drop_ratio": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 0.2,
+            "description": "max. Rückgang ggü. Bestand, sonst kein Ersetzen",
+            "title": "Max Drop Ratio"
+          },
+          "max_error_ratio": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Error Ratio"
+          },
+          "geometry_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Geometry Types"
+          },
+          "required": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Required",
+            "type": "array"
+          },
+          "expected_columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Columns"
+          },
+          "strict_count": {
+            "default": true,
+            "title": "Strict Count",
+            "type": "boolean"
+          }
+        },
+        "title": "Guards",
+        "type": "object"
+      },
+      "Mapping": {
+        "additionalProperties": false,
+        "properties": {
+          "geometry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Name der Geometrie-Eigenschaft (nur zur Prüfung des Schemas)",
+            "title": "Geometry"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/FieldExpr"
+              },
+              {
+                "$ref": "#/$defs/ConcatExpr"
+              },
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "attributes": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/FieldExpr"
+                },
+                {
+                  "$ref": "#/$defs/ConcatExpr"
+                },
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Attributes",
+            "type": "object"
+          }
+        },
+        "title": "Mapping",
+        "type": "object"
+      },
+      "NormalizeSpec": {
+        "additionalProperties": false,
+        "properties": {
+          "zfill": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "mit führenden Nullen auf diese Länge auffüllen",
+            "title": "Zfill"
+          },
+          "strip": {
+            "default": true,
+            "title": "Strip",
+            "type": "boolean"
+          },
+          "upper": {
+            "default": false,
+            "title": "Upper",
+            "type": "boolean"
+          }
+        },
+        "title": "NormalizeSpec",
+        "type": "object"
+      },
+      "RegionFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "column": {
+            "title": "Column",
+            "type": "string"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Prefix"
+          }
+        },
+        "required": [
+          "column",
+          "prefix"
+        ],
+        "title": "RegionFilter",
+        "type": "object"
+      },
+      "Reshape": {
+        "additionalProperties": false,
+        "properties": {
+          "wide_to_long": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/WideToLong"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "title": "Reshape",
+        "type": "object"
+      },
+      "TargetRef": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          }
+        },
+        "required": [
+          "dataset"
+        ],
+        "title": "TargetRef",
+        "type": "object"
+      },
+      "ValueRecordSpec": {
+        "additionalProperties": false,
+        "description": "Welche Zielfelder einer CSV-Zeile Bezug, Name, Wert und Zeitbezug sind.",
+        "properties": {
+          "object_key": {
+            "default": "region_key",
+            "title": "Object Key",
+            "type": "string"
+          },
+          "name": {
+            "default": "indicator",
+            "title": "Name",
+            "type": "string"
+          },
+          "value": {
+            "default": "value",
+            "title": "Value",
+            "type": "string"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "period",
+            "title": "Period"
+          }
+        },
+        "title": "ValueRecordSpec",
+        "type": "object"
+      },
+      "WfsPaging": {
+        "additionalProperties": false,
+        "properties": {
+          "strategy": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "startindex",
+              "bbox_tiles",
+              "none"
+            ],
+            "title": "Strategy",
+            "type": "string"
+          },
+          "page_size": {
+            "default": 1000,
+            "maximum": 100000,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "tile_size_m": {
+            "default": 20000,
+            "exclusiveMinimum": 0,
+            "title": "Tile Size M",
+            "type": "number"
+          },
+          "max_pages": {
+            "default": 10000,
+            "minimum": 1,
+            "title": "Max Pages",
+            "type": "integer"
+          },
+          "throttle_ms": {
+            "default": 200,
+            "minimum": 0,
+            "title": "Throttle Ms",
+            "type": "integer"
+          }
+        },
+        "title": "WfsPaging",
+        "type": "object"
+      },
+      "WfsSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "version": {
+            "default": "2.0.0",
+            "enum": [
+              "2.0.0",
+              "1.1.0"
+            ],
+            "title": "Version",
+            "type": "string"
+          },
+          "type_name": {
+            "title": "Type Name",
+            "type": "string"
+          },
+          "request_crs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Standard: Default-CRS des FeatureTypes aus GetCapabilities",
+            "title": "Request Crs"
+          },
+          "output_format": {
+            "default": "auto",
+            "title": "Output Format",
+            "type": "string"
+          },
+          "paging": {
+            "$ref": "#/$defs/WfsPaging",
+            "default": {
+              "strategy": "auto",
+              "page_size": 1000,
+              "tile_size_m": 20000.0,
+              "max_pages": 10000,
+              "throttle_ms": 200
+            }
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "[minx, miny, maxx, maxy] in request_crs",
+            "title": "Bbox"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "OGC-Filter (XML) oder einfache Gleichheitsfilter",
+            "title": "Filter"
+          },
+          "sort_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "SORTBY beim seitenweisen Abruf; Standard: erstes business_key-Feld, wenn der Dienst ImplementsSorting meldet",
+            "title": "Sort By"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "zusätzliche Request-Parameter (z. B. API-Schlüssel per ${VAR})",
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "url",
+          "type_name"
+        ],
+        "title": "WfsSettings",
+        "type": "object"
+      },
+      "WfsSource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "license": {
+            "title": "License",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attribution"
+          },
+          "schedule": {
+            "default": "monthly",
+            "description": "Zeitplan (Bieterantwort V7): daily | weekly | monthly oder Cron mit 5 Feldern; mindestens ein Lauf je Monat",
+            "title": "Schedule",
+            "type": "string"
+          },
+          "skip_if_unchanged": {
+            "default": true,
+            "title": "Skip If Unchanged",
+            "type": "boolean"
+          },
+          "business_key": {
+            "description": "Fachlicher Schlüssel (Bieterantwort V4): Feld(er), über die Datensätze verknüpft und Läufe verglichen werden (neu/geändert/entfernt), z. B. [ags]",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Business Key",
+            "type": "array"
+          },
+          "key_normalize": {
+            "additionalProperties": {
+              "$ref": "#/$defs/NormalizeSpec"
+            },
+            "default": {},
+            "description": "Normalisierung je Schlüsselfeld",
+            "title": "Key Normalize",
+            "type": "object"
+          },
+          "target": {
+            "$ref": "#/$defs/TargetRef"
+          },
+          "guards": {
+            "$ref": "#/$defs/Guards",
+            "default": {
+              "min_features": null,
+              "min_rows": null,
+              "max_drop_ratio": 0.2,
+              "max_error_ratio": null,
+              "geometry_types": null,
+              "required": [],
+              "expected_columns": null,
+              "strict_count": true
+            }
+          },
+          "type": {
+            "const": "wfs",
+            "title": "Type",
+            "type": "string"
+          },
+          "wfs": {
+            "$ref": "#/$defs/WfsSettings"
+          },
+          "mapping": {
+            "$ref": "#/$defs/Mapping",
+            "default": {
+              "geometry": null,
+              "name": null,
+              "attributes": {}
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "license",
+          "business_key",
+          "target",
+          "type",
+          "wfs"
+        ],
+        "title": "WfsSource",
+        "type": "object"
+      },
+      "WideToLong": {
+        "additionalProperties": false,
+        "properties": {
+          "id_columns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Id Columns",
+            "type": "array"
+          },
+          "value_columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Standard: alle übrigen Spalten",
+            "title": "Value Columns"
+          },
+          "var_name": {
+            "default": "period",
+            "title": "Var Name",
+            "type": "string"
+          },
+          "value_name": {
+            "default": "value",
+            "title": "Value Name",
+            "type": "string"
+          },
+          "indicator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "fester Indikatorname, falls die Datei nur einen enthält",
+            "title": "Indicator"
+          }
+        },
+        "required": [
+          "id_columns"
+        ],
+        "title": "WideToLong",
+        "type": "object"
+      }
+    },
+    "discriminator": {
+      "mapping": {
+        "csv": "#/$defs/CsvSource",
+        "wfs": "#/$defs/WfsSource"
+      },
+      "propertyName": "type"
+    },
+    "oneOf": [
+      {
+        "$ref": "#/$defs/WfsSource"
+      },
+      {
+        "$ref": "#/$defs/CsvSource"
+      }
+    ]
+  }
+}

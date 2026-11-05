@@ -1,0 +1,23 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+data/
+reports/
+*.gfs
+.playwright-mcp/
+
+# Nie ins Repository: Zugangsdaten, Cluster-Zugänge, Exportordner
+Login.txt
+*.kubeconfig
+kubeconfig*
+/export/

@@ -1,0 +1,31 @@
+# Übungsbeispiel „Neue Quelle anbinden“ (docs/neue_quelle_anbinden.md, Abnahmeprüfung A-10):
+# Landkreise und kreisfreie Städte Brandenburg aus demselben WFS – nur durch Konfiguration.
+# Zum Aktivieren nach config/sources/ kopieren.
+# Geprüft am 29.10.2026: app:krs vorhanden, RESULTTYPE=hits → 18 Objekte.
+id: geobasis_bb_kreise
+type: wfs
+enabled: true
+title: "Landkreise und kreisfreie Städte Brandenburg (LGB)"
+license: "dl-de/by-2-0"
+attribution: "© GeoBasis-DE/LGB, dl-de/by-2-0"
+schedule: weekly
+wfs:
+  url: "https://isk.geobasis-bb.de/ows/vg_wfs"
+  type_name: "app:krs"
+  request_crs: "EPSG:25833"
+business_key: ["krss"]
+key_normalize: {krss: {zfill: 5}}
+mapping:
+  geometry: geom
+  name: krs_name
+  attributes:
+    krss: krss
+    kfz: krs_kfz
+    art: krs_art
+    aktualitaet: krs_aktualitaet
+target:
+  dataset: "geobasis_bb_kreise"
+guards:
+  min_features: 18
+  geometry_types: [MultiPolygon, Polygon]
+  required: [krss, krs_name]

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Demo-Karte – Geodaten-Import-Pipeline (Demonstrator)</title>
+  <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="map-page">
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand"><strong>Geodaten-Import-Pipeline</strong><span>Demonstrator · WFS/CSV → PostgreSQL/PostGIS</span></div>
+      <button type="button" class="btn-outline" id="logout" hidden>Abmelden</button>
+    </div>
+  </header>
+  <div class="band">
+    <div class="wrap">
+      <p id="model-hint"></p>
+      <div id="sim-banner" hidden>Simulation – keine echten Änderungen der Quelle</div>
+    </div>
+  </div>
+  <main class="content">
+    <aside>
+      <section>
+        <h2>Gemeinde suchen</h2>
+        <p class="hint">Springt zu einer Gemeinde und zeigt ihren Wert der eingefärbten Kennzahl.</p>
+        <form id="search-form" role="search">
+          <label class="field-label" for="search">Gemeinde oder AGS eingeben</label>
+          <div class="search-row">
+            <input id="search" type="search" list="search-list" placeholder="z. B. Potsdam" autocomplete="off">
+            <datalist id="search-list"></datalist>
+            <button type="submit">Suchen</button>
+          </div>
+        </form>
+        <p id="search-stats" class="small"></p>
+        <ul id="search-results" class="small"></ul>
+      </section>
+      <section>
+        <h2>Kennzahlenkarte</h2>
+        <p class="hint">Färbt alle Gemeinden nach einer INKAR-Kennzahl ein (WFS-Geometrie + CSV-Werte, verknüpft über den AGS).</p>
+        <label class="field-label" for="indicator">Kennzahl</label>
+        <select id="indicator"><option value="">Kennzahlen werden geladen …</option></select>
+        <label class="field-label" for="period">Jahr</label>
+        <select id="period"></select>
+        <label class="check"><input type="checkbox" id="show-choropleth" checked> Gemeinden einfärben</label>
+        <p id="choro-legend" class="small muted"></p>
+      </section>
+      <section>
+        <h2>Umkreissuche</h2>
+        <p class="hint">Findet alle Gemeinden, die ganz oder teilweise in einem Kreis liegen – mit Entfernung zum
+          Mittelpunkt und der Fläche, die innerhalb des Kreises liegt (räumliche Abfrage in PostGIS).</p>
+        <label class="field-label" for="radius-center"><span class="step">1</span>Mittelpunkt wählen</label>
+        <select id="radius-center">
+          <option value="campus">TH Brandenburg (Campus)</option>
+          <option value="gemeinde" disabled>Gefundene Gemeinde (zuerst oben suchen)</option>
+          <option value="klick">Punkt in der Karte anklicken</option>
+        </select>
+        <label class="field-label" for="radius"><span class="step">2</span>Radius: <output id="radius-out">10,0 km</output></label>
+        <input type="range" id="radius" min="500" max="20000" step="500" value="10000">
+        <div class="range-scale small muted"><span>0,5 km</span><span>20 km</span></div>
+        <button id="radius-btn" type="button"><span class="step step-inv">3</span>Umkreis suchen</button>
+        <p id="radius-stats" class="small"></p>
+        <table id="radius-results" class="small result-table" hidden>
+          <thead><tr><th>Gemeinde</th><th>Abstand</th><th>Fläche im Kreis</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Datensatz</h2>
+        <p class="hint">Welche WFS-Quelle als Gemeindefläche dient.</p>
+        <label class="field-label" for="dataset">WFS-Datensatz</label>
+        <select id="dataset"></select>
+        <label class="check"><input type="checkbox" id="show-features" checked> Umrisse anzeigen</label>
+      </section>
+      <section>
+        <h2>Änderungskarte</h2>
+        <p class="hint">Was hat ein Import verändert? Neu, geändert und entfallen gegenüber dem vorherigen Lauf.</p>
+        <label class="field-label" for="run">Import-Lauf</label>
+        <select id="run"></select>
+        <label class="check"><input type="checkbox" id="show-changes"> Änderungen dieses Laufs einfärben</label>
+        <div class="legend">
+          <span><span class="sw added"></span> neu</span> <span><span class="sw changed"></span> geändert</span>
+          <span><span class="sw deleted"></span> entfallen</span> <span><span class="sw unchanged"></span> unverändert</span>
+        </div>
+        <p id="run-stats" class="small"></p>
+      </section>
+      <section>
+        <h2>Fehler-Marker</h2>
+        <p class="hint">Datensätze, die die Prüfung beim Import nicht bestanden haben.</p>
+        <label class="check"><input type="checkbox" id="show-errors"> Fehler des gewählten Laufs zeigen</label>
+        <p id="error-stats" class="small"></p>
+      </section>
+      <section>
+        <h2>Läufe</h2>
+        <p class="hint">Lauf-Historie der Pipeline.</p>
+        <ul id="runs" class="small"></ul>
+      </section>
+    </aside>
+    <div class="map-wrap">
+      <div id="map" role="region" aria-label="Karte"></div>
+      <p id="app-error" role="alert" hidden></p>
+      <div id="loading" role="status" aria-live="polite" hidden>
+        <span class="bar"></span><span class="badge"><span class="spinner" aria-hidden="true"></span>Daten werden geladen …</span>
+      </div>
+    </div>
+  </main>
+  <section id="error-list" hidden>
+    <h2>Fehler ohne Geometrie</h2>
+    <table><thead><tr><th>Quelle</th><th>Schlüssel</th><th>Grund</th></tr></thead><tbody></tbody></table>
+  </section>
+  <footer>
+    <div class="wrap">
+      <span id="attribution"></span>
+      <span>Entwickelt von der RIT Services GmbH, Köln – Demonstrator, keine Seite der TH Brandenburg</span>
+    </div>
+  </footer>
+  <script src="/static/vendor/leaflet/leaflet.js"></script>
+  <script src="/static/map.js"></script>
+</body>
+</html>

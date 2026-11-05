@@ -1,0 +1,68 @@
+# Amt für Statistik Berlin-Brandenburg (AfS) – zweite CSV-Quelle (Bieterantwort V10), Gemeinden Brandenburg.
+# TODO_TH: Datensatz in AP1 bestätigen
+#
+# Recherche 02.11.2026: Das AfS veröffentlicht Gemeindedaten als XLSX (Statistischer Bericht A I 4 / A V 2 – j,
+# Pfad wechselt je Ausgabe), nicht als CSV unter fester URL; das Datenportal bietet keine Download-URL.
+# Als CSV per URL liegen dieselben Werte in der Regionaldatenbank Deutschland vor, einem gemeinsamen Angebot
+# der Statistischen Ämter des Bundes und der Länder, zu denen das AfS gehört (Stichprobe Ahrensfelde 14.464 und
+# Potsdam 185.137 am 02.11.2026 mit dem AfS-Bericht abgeglichen). Laut Bieterantwort ist beim AfS auch das
+# Einlesen aus einer Datei erlaubt: fallback_path.
+#
+# Tabelle 12411-01-01-5-B „Bevölkerung nach Geschlecht – Stichtag 31.12. – regionale Ebenen“ (ganz Deutschland,
+# ca. 460 KB, jährlich; Stand der Datei 13.07.2026, Stichtag 31.12.2025): ISO-8859-1, Trennzeichen ";",
+# 7 Kopfzeilen ohne verwendbare Spaltennamen, Datenzeilen "AGS;Name;insgesamt;männlich;weiblich",
+# fehlende Werte "-" (aufgelöste Gemeinden), danach ab "__________" Fußnoten und Lizenzhinweis.
+# Brandenburg: 420 Zeilen mit AGS 12…, davon 413 Gemeinden mit Werten.
+#
+# Nutzungsbedingungen (wörtlich in der Datei): „© Statistische Ämter des Bundes und der Länder, Deutschland, 2026.
+# Dieses Werk ist lizenziert unter der Datenlizenz Deutschland - Namensnennung - Version 2.0.“
+id: afs_bb
+type: csv
+enabled: true
+title: "AfS/Regionalstatistik – Bevölkerung der Gemeinden Brandenburgs (Tabelle 12411-01-01-5-B)"
+license: "dl-de/by-2-0"
+attribution: "© Statistische Ämter des Bundes und der Länder, Deutschland, 2026 (dl-de/by-2-0)"
+schedule: monthly             # erscheint jährlich; eine unveränderte Datei wird per Hash erkannt
+csv:
+  location:
+    # TODO_TH: Datensatz in AP1 bestätigen
+    url: "https://www.regionalstatistik.de/genesisws/downloader/00/tables/12411-01-01-5-B_00.csv"
+    fallback_path: /data/inbox/afs_bb.csv   # Ersatz bei gescheitertem Download: Datei gleichen Aufbaus
+  encoding: auto              # ISO-8859-1, wird erkannt
+  delimiter: ";"
+  skip_rows: 7
+  column_names: [ags, gemeinde, insgesamt, maennlich, weiblich]
+  footer_marker: "__________"
+  na_values: ["-", ".", "x", "…"]
+  region_filter:
+    column: ags
+    prefix: "12"              # Brandenburg
+reshape:
+  wide_to_long:               # je Gemeinde drei Werte → drei Zeilen (Merkmal = Spaltenname)
+    id_columns: [ags]
+    value_columns: [insgesamt, maennlich, weiblich]
+    var_name: indicator
+    value_name: value
+columns:
+  ags:       {to: region_key, type: str, normalize: {zfill: 8}}
+  indicator: {to: indicator, type: str}
+  value:     {to: value, type: float}
+record:
+  object_key: region_key
+  name: indicator
+  value: value
+  period: null
+business_key: [region_key, indicator]   # fachlicher Schlüssel (V4): AGS + Merkmal
+geometry_join:
+  source: geobasis_bb_gemeinden
+  column: region_key
+  on_missing: warn
+target:
+  dataset: "afs_bb_bevoelkerung"
+  metadata:
+    titel: "Bevölkerung der Gemeinden Brandenburgs (Regionalstatistik/AfS)"
+    publisher: "AfS"          # → dct_catalog_publisher; Wert mit der TH in AP1 abstimmen
+guards:
+  min_rows: 1200              # 420 Zeilen × 3 Merkmale = 1.260; 7 aufgelöste Gemeinden ohne Wert („-“) werden als
+                              # missing_required_field übersprungen (Wert ist Pflicht, Bieterantwort 63) → 1.239
+  max_drop_ratio: 0.2

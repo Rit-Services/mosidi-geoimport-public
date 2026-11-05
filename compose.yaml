@@ -1,0 +1,77 @@
+# Eigenständiges Setup: PostgreSQL/PostGIS + Pipeline + Scheduler (+ Demo-Karte im Profil "demo").
+#
+#   cp .env.example .env            # Passwörter setzen
+#   docker compose up -d db scheduler
+#   docker compose run --rm pipeline validate-config
+#   docker compose run --rm pipeline run
+#   docker compose --profile demo up -d map      # Demo-Karte auf http://127.0.0.1:8080
+#
+# In ein bestehendes MOSIDI-Compose einbinden: compose.mosidi.yaml.
+name: geoimport
+
+x-pipeline: &pipeline
+  build: .
+  image: mosidi-geoimport:${APP_VERSION:-0.10.0}
+  env_file: .env
+  environment:
+    POSTGRES_HOST: db
+    POSTGRES_PORT: "5432"
+  volumes:
+    - ./config:/app/config:ro
+    - data:/data
+  depends_on:
+    db: {condition: service_healthy}
+
+services:
+  db:
+    image: postgis/postgis:16-3.5          # Version gepinnt; beim Update Release Notes prüfen
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD in .env setzen}
+      MAP_DB_USER: ${MAP_DB_USER:-geoimport_map}
+      MAP_DB_PASSWORD: ${MAP_DB_PASSWORD:-}
+      TZ: Europe/Berlin
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    # Nur lokal erreichbar; Windows-Hosts sperren 5432 teils (reservierter Portbereich) → hoher Standardport
+    ports: ["127.0.0.1:${POSTGRES_HOST_PORT:-55433}:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  pipeline:
+    <<: *pipeline
+    command: ["run", "--trigger", "manual"]
+    profiles: ["run"]                     # nur per "docker compose run --rm pipeline …"
+
+  scheduler:
+    <<: *pipeline
+    # Zeitplan aus config/sources/*.yaml (Feld schedule) erzeugen, nicht fest im Image
+    entrypoint: ["sh", "-c", "pipeline init-meta && pipeline crontab -o /tmp/crontab && exec supercronic -passthrough-logs /tmp/crontab"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pipeline", "check-target", "--quick"]
+      interval: 60s
+
+  map:
+    <<: *pipeline
+    entrypoint: ["uvicorn", "webmap.app:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${MAP_DB_USER:-geoimport_map}
+      POSTGRES_PASSWORD: ${MAP_DB_PASSWORD:?MAP_DB_PASSWORD in .env setzen}
+    ports: ["127.0.0.1:${MAP_PORT:-8080}:8080"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health')"]
+      interval: 30s
+    profiles: ["demo"]
+    restart: unless-stopped
+
+volumes:
+  dbdata: {}
+  data: {}

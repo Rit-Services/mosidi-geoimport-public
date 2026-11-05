@@ -1,0 +1,25 @@
+mosidi-geoimport
+Copyright 2026 RIT Services GmbH
+
+Lizenziert unter der Apache License, Version 2.0 (siehe LICENSE).
+
+Herkunft und Vorarbeiten
+------------------------
+Die CSV-Anbindung generalisiert Ideen aus den Vorarbeiten der TH Brandenburg im Repository
+MOSIDI-ORG/MOSIDI (services/backend/src/inkar_import/, gesichtet am 29.10.2026 und erneut am 02.11.2026,
+Commit 26cadbba3d6223c84872987104fc737359bf8bfc): Suche der neuesten Jahresdatei per HEAD, Dateimuster im
+Archiv, Spaltenmapping per Konfigurationsdatei, Formatvergleich zwischen Versionen. Es wurde kein Code kopiert;
+die Logik wurde neu implementiert (siehe docs/vorarbeiten_bewertung.md und docs/abgleich_mosidi_inkar_import.md).
+
+Eingebundene Drittsoftware
+--------------------------
+webmap/static/vendor/leaflet: Leaflet 1.9.4, BSD-2-Clause, (c) 2010-2023 Volodymyr Agafonkin,
+(c) 2010-2011 CloudMade.
+webmap/static/fonts: Open Sans 5.3.0 (Fontsource), SIL Open Font License 1.1 (webmap/static/fonts/OFL.txt).
+Vollständige Übersicht aller Abhängigkeiten: docs/drittkomponenten.md
+
+Daten
+-----
+Test-Fixtures unter tests/fixtures/wfs: © GeoBasis-DE/LGB, dl-de/by-2-0 (Abrufdatum in tests/fixtures/README.md).
+Test-Fixtures unter tests/fixtures/csv: synthetisch, keine echten Werte.
+Das Repository enthält keine Originaldaten der Quellen; deren Nutzungsbedingungen der Quellen stehen in config/sources/*.yaml.

@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "numberMatched": 3,
+  "features": [
+    {"type": "Feature", "id": "gem.1",
+     "properties": {"ags": 12064000, "gem_name": "Seelow", "einwohner": 5432, "flaeche": 12.50, "aktiv": true, "extra": {"a": 1}},
+     "geometry": {"type": "Polygon", "coordinates": [[[14.3, 52.5], [14.4, 52.5], [14.4, 52.6], [14.3, 52.5]]]}},
+    {"type": "Feature", "id": "gem.2",
+     "properties": {"ags": 12064001, "gem_name": "Lebus", "einwohner": null, "flaeche": 3, "aktiv": false, "extra": null},
+     "geometry": {"type": "Point", "coordinates": [14.5, 52.4]}},
+    {"type": "Feature", "id": "gem.3",
+     "properties": {"ags": null, "gem_name": "ohne Schlüssel", "einwohner": 7, "flaeche": null, "aktiv": null, "extra": null},
+     "geometry": null}
+  ]
+}

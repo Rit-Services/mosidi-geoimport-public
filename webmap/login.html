@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Anmeldung – Geodaten-Import-Pipeline (Demonstrator)</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-page">
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand"><strong>Geodaten-Import-Pipeline</strong><span>Demonstrator · WFS/CSV → PostgreSQL/PostGIS</span></div>
+    </div>
+  </header>
+  <div class="band"><div class="wrap"><p>Vergabe VA-2026-536 · Technische Hochschule Brandenburg</p></div></div>
+  <main class="wrap">
+    <div class="login-card">
+      <nav class="crumbs" aria-label="Pfad"><span>Demonstrator</span><span>Anmeldung</span></nav>
+      <h1>Anmeldung</h1>
+      <p>Zugang nur mit den bereitgestellten Zugangsdaten.</p>
+      <!--FEHLER-->
+      <form method="post" action="/login">
+        <input type="hidden" name="csrf" value="<!--CSRF-->">
+        <label for="username">Benutzername</label>
+        <input id="username" name="username" autocomplete="username" required autofocus>
+        <label for="password">Kennwort</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Anmelden</button>
+      </form>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span>Entwickelt von der RIT Services GmbH, Köln</span>
+      <span>Demonstrator für die Vergabe VA-2026-536 – keine Seite der Technischen Hochschule Brandenburg</span>
+    </div>
+  </footer>
+</body>
+</html>

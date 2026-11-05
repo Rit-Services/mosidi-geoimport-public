@@ -1,0 +1,55 @@
+# Einbindung in das bestehende MOSIDI-Compose (Repository MOSIDI-ORG/MOSIDI, Service "brandenburg_db").
+# Kein eigener Datenbank-Service (brandenburg_db unten nur mit den Werten des MOSIDI-Compose);
+# gleiche Variablennamen wie im MOSIDI-Compose.
+#
+#   docker compose -f docker-compose.yml -f /pfad/zu/mosidi-geoimport/compose.mosidi.yaml up -d geoimport-scheduler
+#   docker compose -f docker-compose.yml -f …/compose.mosidi.yaml run --rm geoimport run
+#
+# Das Netzwerk ist das Standardnetz des MOSIDI-Projekts (vom Betreiber zu bestätigen).
+# Pfade sind relativ zum Verzeichnis der ersten Compose-Datei; GEOIMPORT_DIR ggf. anpassen.
+# Alle Verbindungswerte kommen aus Umgebungsvariablen (.env); Standard laut Bieterantwort V8:
+# Datenbank brandenburg_db im Service brandenburg_db (Image postgis/postgis).
+x-geoimport-db: &geoimport-db
+  POSTGRES_HOST: ${POSTGRES_HOST:-brandenburg_db}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  POSTGRES_DB: ${POSTGRES_DB:-brandenburg_db}
+
+services:
+  # Bestehender DB-Service des MOSIDI-Compose, hier nur zur Dokumentation wiederholt (Werte wie dort).
+  # Ohne feste Version wie im MOSIDI-Compose; für reproduzierbare Builds wird empfohlen, eine Version
+  # festzulegen (z. B. postgis/postgis:17-3.5).
+  brandenburg_db:
+    image: postgis/postgis
+
+  geoimport:
+    build: ${GEOIMPORT_DIR:-../mosidi-geoimport}
+    image: mosidi-geoimport:${GEOIMPORT_VERSION:-0.10.0}
+    env_file: ${GEOIMPORT_DIR:-../mosidi-geoimport}/.env
+    environment:
+      <<: *geoimport-db
+      TARGET_CONFIG: target.yaml          # Abbildung auf das Zielmodell der TH
+      PIPELINE_ENV: prod
+    volumes:
+      - ${GEOIMPORT_DIR:-../mosidi-geoimport}/config:/app/config:ro
+      - geoimport_data:/data
+    depends_on: [brandenburg_db]
+    command: ["run", "--trigger", "manual"]
+    profiles: ["geoimport-run"]
+
+  geoimport-scheduler:
+    image: mosidi-geoimport:${GEOIMPORT_VERSION:-0.10.0}
+    env_file: ${GEOIMPORT_DIR:-../mosidi-geoimport}/.env
+    environment:
+      <<: *geoimport-db
+      TARGET_CONFIG: target.yaml
+      PIPELINE_ENV: prod
+    volumes:
+      - ${GEOIMPORT_DIR:-../mosidi-geoimport}/config:/app/config:ro
+      - geoimport_data:/data
+    depends_on: [brandenburg_db]
+    # Zeitplan aus config/sources/*.yaml (Feld schedule) erzeugen, nicht fest im Image
+    entrypoint: ["sh", "-c", "pipeline init-meta && pipeline crontab -o /tmp/crontab && exec supercronic -passthrough-logs /tmp/crontab"]
+    restart: unless-stopped
+
+volumes:
+  geoimport_data: {}

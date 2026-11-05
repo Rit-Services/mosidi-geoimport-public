@@ -1,0 +1,167 @@
+/* Gestaltung angelehnt an den Webauftritt der TH Brandenburg (Farben, Schrift, Raster) – ohne deren Logo:
+   die Seite ist ein Demonstrator der RIT Services GmbH, keine Seite der TH. Open Sans liegt lokal (OFL-1.1). */
+@font-face { font-family: "Open Sans"; font-weight: 400; font-display: swap; src: url("/static/fonts/open-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Open Sans"; font-weight: 600; font-display: swap; src: url("/static/fonts/open-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Open Sans"; font-weight: 700; font-display: swap; src: url("/static/fonts/open-sans-latin-700-normal.woff2") format("woff2"); }
+
+:root {
+  --red: #cc0a2f; --red-dark: #a0081f; --text: #333; --muted: #666; --line: #e5e5e5; --line-strong: #ccc;
+  --page: #ededed; --panel: #fff;
+  --added: #1f9d55; --changed: #e0a800; --deleted: #d64545; --unchanged: #999; --sim: #b42318;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; font: 14px/1.5 "Open Sans", Arial, sans-serif; color: var(--text);
+  background: linear-gradient(180deg, #fff 0, var(--page) 420px) fixed; accent-color: var(--red);
+}
+a { color: var(--red); }
+.wrap { max-width: 1600px; margin: 0 auto; padding: 0 1.5rem; }
+.muted { color: var(--muted); font-weight: normal; }
+.small { font-size: .85rem; }
+
+/* Kopf: weiße Leiste, darunter das rote Band */
+.site-header .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 72px; gap: 1rem; }
+.brand { line-height: 1.25; }
+.brand strong { display: block; font-size: 1.05rem; font-weight: 700; color: #000; }
+.brand span { font-size: .8rem; color: var(--muted); }
+.btn-outline {
+  display: inline-block; border: 2px solid var(--red); padding: .3rem .8rem; color: #000; font: inherit;
+  font-weight: 600; text-decoration: none; background: #fff; cursor: pointer;
+}
+.btn-outline:hover, .btn-outline:focus-visible { background: var(--red); color: #fff; }
+.band { background: var(--red); color: #fff; }
+.band .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 44px; }
+.band p { margin: 0; font-size: .9rem; letter-spacing: .02em; }
+#sim-banner { background: #fff; color: var(--sim); font-weight: 700; padding: .2rem .7rem; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Inhalt: weiße Fläche mit Seitenleiste und Karte */
+.map-page { height: 100vh; display: flex; flex-direction: column; }
+.content { background: var(--panel); display: grid; grid-template-columns: 320px 1fr; flex: 1 1 auto; min-height: 0; }
+aside { overflow-y: auto; overflow-x: hidden; padding: 1rem 1.2rem 1.5rem; border-right: 1px solid var(--line); }
+aside section { padding: 1rem 0 1.1rem; border-top: 1px solid var(--line); }
+aside section:first-child { border-top: 0; padding-top: .4rem; }
+h1 { font-weight: 400; color: var(--red); }
+/* Abschnittsüberschrift: rotes Quadrat wie in der Pfadnavigation der TH, bewusst ohne Linie (sieht sonst wie ein Feld aus) */
+h2 { font-size: .95rem; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: .03em; margin: 0 0 .2rem; }
+aside h2::before { content: ""; display: inline-block; width: 8px; height: 8px; background: var(--red); margin-right: .5rem; vertical-align: 1px; }
+.hint { margin: 0 0 .6rem; font-size: .8rem; color: var(--muted); line-height: 1.4; }
+.field-label { display: block; font-weight: 600; font-size: .85rem; margin: .7rem 0 .2rem; color: #000; }
+aside label.check { display: flex; align-items: center; gap: .4rem; margin: .6rem 0 .2rem; }
+.step {
+  display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: 50%;
+  background: var(--red); color: #fff; font-size: .72rem; font-weight: 700; margin-right: .4rem;
+}
+.step-inv { background: #fff; color: var(--red); }
+.range-scale { display: flex; justify-content: space-between; margin: -.2rem 0 .6rem; }
+.result-table { width: 100%; border-collapse: collapse; margin-top: .3rem; table-layout: fixed; }
+.result-table th:nth-child(1) { width: 46%; } .result-table th:nth-child(2) { width: 22%; } .result-table th:nth-child(3) { width: 32%; }
+.result-table td:first-child { overflow-wrap: anywhere; }
+.result-table th { text-align: left; font-weight: 600; border-bottom: 2px solid var(--red); padding: .2rem .25rem; }
+.result-table td { border-bottom: 1px solid var(--line); padding: .2rem .25rem; }
+.result-table td:not(:first-child), .result-table th:not(:first-child) { text-align: right; }
+.result-table td:not(:first-child) { white-space: nowrap; }
+.result-table tbody tr { cursor: pointer; }
+.result-table tbody tr:hover, .result-table tbody tr:focus-visible { background: #fbe6ea; outline: none; }
+aside select, aside input[type=range] { width: 100%; margin: 0 0 .2rem; }
+/* Eingabefelder klar als Felder erkennbar: Rahmen, weiße Fläche */
+select, input[type=search], input[type=text] {
+  font: inherit; padding: .4rem .5rem; border: 1px solid #999; border-radius: 0; background: #fff; color: var(--text);
+}
+select:hover, input[type=search]:hover { border-color: #555; }
+select:focus-visible, input[type=search]:focus-visible { border-color: var(--red); outline: 1px solid var(--red); outline-offset: 0; }
+button:focus-visible, input[type=checkbox]:focus-visible, input[type=range]:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+aside label { display: block; }
+button, .btn {
+  font: inherit; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; padding: .45rem .9rem;
+  border: 0; background: var(--red); color: #fff; cursor: pointer; width: 100%;
+}
+button:hover, .btn:hover { background: var(--red-dark); }
+.map-wrap { position: relative; min-height: 0; min-width: 0; }
+#map { height: 100%; }
+#map.pick-mode { cursor: crosshair; }
+
+/* Ladeanzeige über der Karte */
+#app-error {
+  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; margin: 0;
+  max-width: 80%; padding: 8px 14px; background: #fff; color: var(--red); border: 1px solid var(--red);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .2); font-size: 14px;
+}
+#loading { position: absolute; top: 0; left: 0; right: 0; z-index: 1000; pointer-events: none; }
+#loading .bar {
+  display: block; height: 4px; background: linear-gradient(90deg, transparent, var(--red), transparent) no-repeat;
+  background-size: 40% 100%; animation: loadbar 1.1s linear infinite;
+}
+#loading .badge {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: .5rem;
+  background: #fff; padding: .35rem .9rem; border-left: 4px solid var(--red); box-shadow: 0 1px 4px rgba(0, 0, 0, .3); font-weight: 600;
+}
+.spinner { width: 14px; height: 14px; border: 2px solid var(--line-strong); border-top-color: var(--red); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes loadbar { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { #loading .bar { animation: none; background: var(--red); } .spinner { animation: none; } }
+
+/* Suche */
+.search-row { display: flex; gap: .4rem; align-items: stretch; }
+.search-row input { flex: 1; min-width: 0; }
+.search-row button { width: auto; }
+#search-results { list-style: none; margin: 0; padding: 0; }
+.link-btn {
+  background: none; color: var(--red); text-transform: none; font-weight: 400; letter-spacing: 0; padding: .15rem 0;
+  text-align: left; width: auto; text-decoration: underline;
+}
+.link-btn:hover { background: none; color: var(--red-dark); }
+button:disabled { opacity: .6; cursor: progress; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .5rem; font-size: .8rem; }
+.sw { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; }
+.sw.added { background: var(--added); } .sw.changed { background: var(--changed); }
+.sw.deleted { background: transparent; border: 2px dashed var(--deleted); } .sw.unchanged { background: var(--unchanged); }
+#runs { padding-left: 0; margin: 0; list-style: none; }
+#runs li { padding: .3rem 0 .3rem .9rem; border-bottom: 1px solid var(--line); position: relative; }
+#runs li::before { content: ""; position: absolute; left: 0; top: .75rem; width: 5px; height: 5px; background: var(--red); }
+#runs li.sim { color: var(--sim); }
+#error-list { padding: .8rem 1.5rem; background: var(--panel); border-top: 1px solid var(--line); max-height: 30vh; overflow-y: auto; flex: none; }
+#error-list table { border-collapse: collapse; width: 100%; }
+#error-list td, #error-list th { border-bottom: 1px solid var(--line); padding: .25rem .4rem; text-align: left; }
+.popup dt { font-weight: 600; } .popup dd { margin: 0 0 .2rem; }
+.leaflet-container { font-family: "Open Sans", Arial, sans-serif; }
+
+/* Legende der Kennzahlenkarte (Leaflet-Control) */
+.map-legend { background: #fff; padding: .6rem .8rem; box-shadow: 0 1px 4px rgba(0, 0, 0, .3); font-size: .8rem; line-height: 1.4; max-width: 280px; }
+.map-legend h3 { margin: 0 0 .1rem; font-size: .85rem; font-weight: 700; color: #000; }
+.map-legend .sub { color: var(--muted); margin-bottom: .4rem; padding-bottom: .3rem; border-bottom: 2px solid var(--red); }
+.map-legend table { border-collapse: collapse; width: 100%; }
+.map-legend td { padding: .1rem .2rem; }
+.map-legend td.n { text-align: right; color: var(--muted); }
+.map-legend .sw { width: 18px; height: 12px; border: 1px solid #777; }
+
+/* Fuß: hellgraue Fläche wie im Webauftritt der TH */
+footer { background: var(--line); color: var(--text); }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .3rem 1.5rem; padding-top: .55rem; padding-bottom: .55rem; min-height: 52px; font-size: .78rem; }
+
+/* Anmeldeseite */
+.login-page { display: flex; flex-direction: column; min-height: 100vh; }
+.login-page .wrap { max-width: 1260px; }
+.login-page main { flex: 1; padding-top: 2rem; padding-bottom: 3rem; width: 100%; max-width: 1260px; }
+.login-card { background: var(--panel); padding: 2.2rem 3.5rem 2.6rem; }
+.login-card form, .login-card .login-error { max-width: 460px; }
+.login-card h1 { font-size: 3.1rem; line-height: 1.15; margin: 0 0 .8rem; }
+.login-card p { margin: 0 0 1.2rem; }
+.login-card label { display: block; font-weight: 600; margin: 1rem 0 .2rem; }
+.login-card input {
+  font: inherit; width: 100%; padding: .45rem .1rem; border: 0; border-bottom: 1px solid var(--muted); background: transparent;
+}
+.login-card input:focus-visible { outline: none; border-bottom: 2px solid var(--red); }
+.login-card button { margin-top: 1.6rem; width: auto; padding: .55rem 1.6rem; }
+.login-error { background: #fbe6ea; border-left: 4px solid var(--red); padding: .5rem .8rem; color: #7a0619; }
+.crumbs { font-size: .78rem; font-weight: 600; margin: 0 0 1.2rem; }
+.crumbs span + span::before { content: ""; display: inline-block; width: 5px; height: 5px; background: var(--red); margin: 0 .6rem 2px; }
+
+@media (max-width: 800px) {
+  .map-page { height: auto; display: block; }
+  .content { grid-template-columns: 1fr; }
+  aside { border-right: 0; }
+  .map-wrap, #map { height: 70vh; }
+  .login-card { padding: 1.5rem; }
+}

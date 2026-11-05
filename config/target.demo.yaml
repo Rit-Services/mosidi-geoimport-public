@@ -1,0 +1,40 @@
+# NUR DEMO: Abbildung auf das Referenzmodell sql/demo_reference_model.sql (Schema "ref").
+# Das Referenzmodell ist eine Annahme von RIT zur Demonstration, NICHT das Datenmodell der TH.
+# Aktiv mit TARGET_CONFIG=target.demo.yaml; der Adapter legt das Modell nur in einer
+# Datenbank an, deren Name auf "_demo" endet.
+adapter: demo_reference
+schema: ref
+tables:
+  metadata:
+    name: metadaten
+    pk: id
+    dataset_column: datensatz
+    columns:
+      titel: "{source.title}"
+      quelle_url: "{source.url}"
+      lizenz: "{source.license}"
+      quellenvermerk: "{source.attribution}"
+      quelltyp: "{source.type}"
+      importiert_am: "{run.started_at}"
+  geometries:
+    name: geometrien
+    pk: id
+    fk_metadata: metadaten_id
+    object_key_column: objekt_schluessel
+    geometry_column: geom
+    srid: 4326
+    columns:
+      name: "{record.name}"
+  attributes:
+    name: attribute
+    fk_metadata: metadaten_id
+    fk_geometry: geometrie_id
+    object_key_column: objekt_schluessel
+    layout: key_value
+    name_column: name
+    value_column: wert
+    period_column: zeitbezug
+    columns:
+      zusatz: "{record.extra}"
+delete_scope:
+  strategy: by_metadata_source

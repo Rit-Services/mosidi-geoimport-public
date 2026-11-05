@@ -1,0 +1,49 @@
+# Abbildung auf die drei bestehenden Tabellen der TH Brandenburg (Metadaten, Geometrien, Attribute).
+#
+# Die Struktur der Tabellen liegt noch nicht vor (Bieterfrage 1). Bis dahin stehen hier Platzhalter
+# TODO_TH_…; "pipeline check-target" und Läufe brechen dann mit einer klaren Meldung ab.
+# Für die Demo: TARGET_CONFIG=target.demo.yaml (Referenzmodell von RIT, nur Annahme).
+#
+# Es wird NICHTS angelegt oder geändert: nur SELECT, INSERT, UPDATE (Metadatenzeile, Geometrien), DELETE
+# (Attribute) und – nach dem Import – REFRESH der unten genannten materialisierten Sicht.
+#
+# Eigenständiger Betrieb ohne MOSIDI-Funktionen (Bieterantworten 74, 75): Die Pipeline schreibt die
+# Metadaten selbst in table_metadata; INKAR-Daten werden über dct_catalog_publisher gekennzeichnet; nach dem
+# Import wird source_granularities aktualisiert. Diese Namen stammen aus den Antworten; alle übrigen Namen
+# (TODO_TH_…) folgen aus dem Schema-Dump der TH, der erst mit der Beauftragung kommt (Antwort 61).
+adapter: table_mapping
+schema: TODO_TH_schema
+tables:
+  metadata:
+    name: table_metadata                    # Antwort 74/75
+    pk: TODO_TH_id
+    dataset_column: TODO_TH_quelle          # Spalte, die die Quelle/den Datensatz kennzeichnet (Bieterfrage 2)
+    columns:                                # Zielspalte ← Vorlage
+      TODO_TH_titel: "{source.title}"
+      TODO_TH_quelle_url: "{source.url}"
+      TODO_TH_lizenz: "{source.license}"
+      TODO_TH_importiert: "{run.started_at}"
+      dct_catalog_publisher: "{meta.publisher}"   # Kennzeichnung je Quelle (target.metadata.publisher), Antwort 74
+  geometries:
+    name: TODO_TH_geometrien
+    pk: TODO_TH_id
+    fk_metadata: TODO_TH_metadaten_id
+    object_key_column: TODO_TH_objekt_schluessel
+    geometry_column: TODO_TH_geom
+    srid: 4326
+    columns:
+      TODO_TH_name: "{record.name}"
+  attributes:
+    name: TODO_TH_attribute
+    fk_metadata: TODO_TH_metadaten_id
+    fk_geometry: TODO_TH_geometrie_id       # oder weglassen, je nach Modell
+    object_key_column: TODO_TH_objekt_schluessel
+    layout: key_value                       # key_value (Name/Wert-Zeilen) | jsonb | wide
+    name_column: TODO_TH_name
+    value_column: TODO_TH_wert
+    period_column: TODO_TH_zeitbezug
+delete_scope:                               # wie „alte Daten derselben Quelle“ gefunden werden (A6)
+  strategy: by_metadata_source              # by_metadata_source | by_source_column | sql
+after_import:                               # Antwort 75: ersetzt die MOSIDI-Funktionen nach dem Import
+  refresh_materialized_views: [source_granularities]   # ohne Schema: schema oben
+  concurrently: false                       # true nur mit eindeutigem Index auf der Sicht (Schema-Dump)
